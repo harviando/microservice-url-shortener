@@ -8,6 +8,8 @@ let bodyParser = require('body-parser');
 let mongoose = require('mongoose');
 mongoose.set('strictQuery', false);
 
+mongoose.connect(process.env['MONGO_URI'], { useNewUrlParser: true, useUnifiedTopology: true });
+
 // Basic Configuration
 const port = process.env.PORT || 3000;
 
