@@ -17,6 +17,9 @@ app.use(cors());
 
 app.use('/public', express.static(`${process.cwd()}/public`));
 
+app.use(bodyParser.urlencoded({ extended: false}));
+app.use(bodyParser.json());
+
 app.get('/', function(req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
@@ -25,6 +28,20 @@ app.get('/', function(req, res) {
 app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
+
+// Schema Init
+const Schema = mongoose.Schema;
+
+const urlSchema = new Schema ({
+  original_link: {
+    type: String,
+    required: true,
+  },
+  short_link: Number,
+});
+
+// Model Init
+let Url = mongoose.model('url', urlSchema);
 
 app.get('/api/shorturl', function(req, res) {
   res.json({
