@@ -36,7 +36,16 @@ app.get('/api/hello', function(req, res) {
 
 app.post('/api/shorturl', function(req, res) {
   let body = req.body;
-  res.json(body);
+
+  // Url validation
+  const dnsLookup = dns.lookup(new URL(req.body.url).hostname, async (err, address) => {
+    if (!address) {
+      res.json({ status: 'Invalid URL', error: err});
+    } else {
+      res.json({ status: 'This is a valid url.' });
+    }
+  });
+  
 });
                               
 app.listen(port, function() {
