@@ -3,13 +3,18 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
+// Connect to MongoDB
 const { MongoClient } = require('mongodb');
 const mySecret = process.env['MONGO_URI'];
 const client = new MongoClient(mySecret);
 
+// Specify the db and it's collection
 const db = client.db('urlshortener');
 const urls = db.collection('urls');
 
+// url needs
+const urlParser = require('url');
+const dns = require('dns');
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
@@ -31,11 +36,7 @@ app.get('/api/hello', function(req, res) {
 
 app.post('/api/shorturl', function(req, res) {
   let body = req.body;
-  res.json({
-    your_duplicate_body: 'success', 
-  });
-
-  console.log(body);
+  res.json(body);
 });
                               
 app.listen(port, function() {
