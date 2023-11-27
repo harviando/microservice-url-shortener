@@ -50,7 +50,20 @@ app.post('/api/shorturl', function(req, res) {
     if (err || !address) {
       return res.json({ status: 'Invalid URL', error: err || 'Invalid Hostname'  });
     }
-    res.json({ status: 'This is a vaid Hostname URL' });
+    // Saving the url to MongoDB
+      // checking if the url is already exist or not, and respond accordingly
+    urls.findOne({ original_url: url }, (err, data) => {
+      if (err) return console.log(err);
+      if (data) {
+        return res.json({
+          original_url: data.original_url,
+          short_url: data.short_url
+        });
+      } else {
+        // write code to assign the unique short url here
+      }
+      
+    })
   });
 });
                               
