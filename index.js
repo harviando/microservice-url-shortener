@@ -10,7 +10,7 @@ const client = new MongoClient(mySecret);
 
 // Specify the db and it's collection
 const db = client.db('urlshortener');
-const urls = db.collection('urls');
+const urls = db.collection('url');
 
 // url needs
 const urlParser = require('url');
@@ -34,37 +34,54 @@ app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
 
-app.post('/api/shorturl', function(req, res) {
+app.post('/api/shorturl',async function(req, res) {
   const { url } = req.body;
 
-  // Url validation
   try {
+    // Url validation
     new URL(url);
   } catch (error) {
-    return res.json({ status: 'Invalid URL', error: error });
+    return res.json({ status: 'Invalid URL', error: error.message });
   }
 
-  // DNS lookup
   const hostname = new URL(url).hostname;
-  dns.lookup(hostname, (err, address) => {
-    if (err || !address) {
-      return res.json({ status: 'Invalid URL', error: err || 'Invalid Hostname'  });
+
+  try {
+    // DNS lookup
+    const address = await new Promise(resolve => {
+      dns.lookup(hostname, (err, address) => {
+        resolve({ err, address });
+      });
+    });
+    
+    if (address.err || !address.address) {
+      return res.json({ status: 'Invalid URL', error: 'Invalid Hostname' });
     }
-    // Saving the url to MongoDB
-      // checking if the url is already exist or not, and respond accordingly
-    urls.findOne({ original_url: url }, (err, data) => {
-      if (err) return console.log(err);
-      if (data) {
-        return res.json({
-          original_url: data.original_url,
-          short_url: data.short_url
-        });
-      } else {
-        // write code to assign the unique short url here
-      }
-      
-    })
-  });
+
+    //MongoDB Operations
+    const existingUrl = await urls.findOne({ original_url: url });
+    if (existingUrl) {
+      return res.json({
+        original_url: existingUrl.original_url,
+        short_url: existingUrl.short_url
+      });
+    };
+
+    const urlCount = await urls.countDocuments({});
+    const urlDoc = {
+      original_url: url,
+      short_url: urlCount
+    };
+
+    const result  = await urls.insertOne(urlDoc);
+    res.json({
+      original_url: url,
+      short_url: urlCount
+    });
+  } catch (error) {
+    console.error('Error: ', error);
+    res.status(500).json({ error: 'Server Error' });
+  }
 });
                               
 app.listen(port, function() {
