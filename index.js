@@ -83,7 +83,27 @@ app.post('/api/shorturl',async function(req, res) {
     res.status(500).json({ error: 'Server Error' });
   }
 });
-                              
+
+app.get('/api/shorturl/:shortUrl', async function(req, res) {
+  const { shortUrl } = req.params;
+
+  try {
+    // Search the URL doc based on the inputted url
+    const existingUrl = await urls.findOne({ short_url: parseInt(shortUrl) });
+
+    // If the url is not found, return an error
+    if (!existingUrl) {
+      res.status(404).json({ error: 'URL not found' });
+    } else {
+      // If found then redirect to original url
+      res.redirect(existingUrl.original_url);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+   
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
