@@ -41,7 +41,7 @@ app.post('/api/shorturl',async function(req, res) {
     // Url validation
     new URL(url);
   } catch (error) {
-    return res.json({ status: 'Invalid URL', error: error.message });
+    return res.json({ error: 'invalid url'});
   }
 
   const hostname = new URL(url).hostname;
@@ -55,7 +55,7 @@ app.post('/api/shorturl',async function(req, res) {
     });
     
     if (address.err || !address.address) {
-      return res.json({ status: 'Invalid URL', error: 'Invalid Hostname' });
+      return res.json({ error: 'invalid url'});
     }
 
     //MongoDB Operations
